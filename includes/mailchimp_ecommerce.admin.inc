@@ -73,6 +73,36 @@ function mailchimp_ecommerce_admin_settings() {
     '#title' => t('Store Currency Code'),
   );
 
+  $list_options = array(
+    '' => '-- Select --',
+    'TRUE' => 'True',
+    'FALSE' => 'False',
+  );
+
+  $form['mailchimp_ecommerce_opt_in'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('New User Opt-In Status'),
+    '#collapsible' => FALSE,
+  );
+  $form['mailchimp_ecommerce_opt_in']['mailchimp_ecommerce_opt_in_status_markup'] = array(
+    '#markup' => t('You must decide on the status of customers that entered into
+     the eCommerce API. By choosing True in the option below, users will added 
+     as normal subscribers.  If you choose true, be certain your customers know 
+     they are subscribing to an email list. If you choose False below, the users 
+     will be added as "transactional" users. Transactional users cannot be changed
+     via the MailChimp UI. Changing the status of a "transactional" user call only
+     be accomplished via the API. For additional information, please read the') . ' ' . l('MailChimp Documentation.', 'http://developer.mailchimp.com/documentation/mailchimp/guides/getting-started-with-ecommerce/#about-subscribers-and-customers', array('external' => TRUE))
+  );
+
+  $form['mailchimp_ecommerce_opt_in']['mailchimp_ecommerce_opt_in_status'] = array(
+    '#type' => 'select',
+    '#title' => t('Opt-In Status For Customers'),
+    '#required' => TRUE,
+    '#options' => $list_options,
+    '#default_value' => variable_get('mailchimp_ecommerce_opt_in_status', ''),
+    '#description' => t('Choose your opt-in status before using this module.'),
+  );
+
   $settings_form = system_settings_form($form);
   $settings_form['#submit'][] = 'mailchimp_ecommerce_admin_settings_submit';
 
