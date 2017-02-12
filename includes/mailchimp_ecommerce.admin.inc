@@ -45,7 +45,6 @@ function mailchimp_ecommerce_admin_settings() {
     );
   }
 
-  // TODO: Can this be moved into the mailchimp_ecommerce_commerce module?
   if (module_exists('commerce')) {
     $form['mailchimp_ecommere_commerce_default_currency'] = array(
       '#type' => 'checkbox',
@@ -63,6 +62,7 @@ function mailchimp_ecommerce_admin_settings() {
     '#type' => 'select',
     '#options' => $list_options_currency,
     '#title' => t('Store Currency Code'),
+    '#description' => t('This is overridden if you have selected to use the default currency from Commerce.')
   );
 
   $list_options = array(
