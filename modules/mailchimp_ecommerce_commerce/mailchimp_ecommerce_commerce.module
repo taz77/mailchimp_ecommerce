@@ -319,11 +319,13 @@ function mailchimp_ecommerce_commerce_parse_customer_profile_address($customer_p
  *
  * @return object
  *   Order object in a MailChimp-friendly format.
+ *
+ * @throws Exception
+ *   Throws an exception if Opt In Status is not set.
  */
 function _mailchimp_ecommerce_commerce_build_order($order_wrapper) {
   $user = user_load($order_wrapper->uid->raw());
-  $currency_code = '';
-  $order_total = '';
+  $customer = [];
   $billing_address = [];
   $lines = [];
 
@@ -364,11 +366,20 @@ function _mailchimp_ecommerce_commerce_build_order($order_wrapper) {
       $lines[] = $line;
     }
   }
-
+  // Pull optin status
+  $optinstatus = variable_get('mailchimp_ecommerce_opt_in_status', NULL);
+  if (is_null($optinstatus) || empty($optinstatus)){
+    watchdog('mailchimp_ecommerce', t('Optin Status has not been set. See admin/config/services/mailchimp/ecommerce.'), array(), WATCHDOG_ERROR);
+    throw new Exception('Optin Status is not set in the MailChimp Ecommerce Module');
+  }
+  // Customer parameters used in the 'customer' portions of the API wrapper.
   $customer = [
     'id' => $user->uid,
+    'email_address' => $user->mail,
+    'opt_in_status' => $optinstatus,
   ];
 
+  // Order paramaters that are used as the 'cart' portions of the API wrapper.
   $order_data = [
     'currency_code' => $currency_code,
     'order_total' => $order_total,
