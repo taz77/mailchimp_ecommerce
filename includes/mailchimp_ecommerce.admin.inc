@@ -9,14 +9,6 @@
  * The MailChimp eCommerce settings form.
  */
 function mailchimp_ecommerce_admin_settings() {
-  $form['mailchimp_ecommerce_integration'] = array(
-    '#type' => 'radios',
-    '#title' => 'Enabled Integration',
-    '#options' => array(
-      '' => t('None'),
-    ),
-    '#default_value' => variable_get('mailchimp_ecommerce_integration', ''),
-  );
   $form['mailchimp_ecommerce_notice'] = array(
     '#markup' => t('This page will allow you to create a store. Once created, you cannot change the list associated with the store.'),
   );
@@ -114,9 +106,6 @@ function mailchimp_ecommerce_admin_settings() {
  */
 function mailchimp_ecommerce_admin_settings_submit($form, &$form_state) {
   $store_id = variable_get('mailchimp_ecommerce_store_id', NULL);
-
-  // Add / update store only if an eCommerce integration is selected.
-  if (!empty($form_state['values']['mailchimp_ecommerce_integration'])) {
     if ($store_id != NULL) {
       // Detect if Commerce is installed and use the default currency.
       if (!empty($form_state['values']['mailchimp_ecommere_commerce_default_currency'])) {
@@ -144,8 +133,4 @@ function mailchimp_ecommerce_admin_settings_submit($form, &$form_state) {
           $currency);
       }
     }
-  }
-  else {
-    variable_del('mailchimp_ecommerce_integration');
-  }
 }
