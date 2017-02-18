@@ -67,8 +67,8 @@ function mailchimp_ecommerce_admin_settings() {
 
   $list_options = [
     '' => '-- Select --',
-    'TRUE' => 'True',
-    'FALSE' => 'False',
+    'TRUE' => 'Normal Subscriber',
+    'FALSE' => 'Transactional Subscriber',
   ];
 
   $form['mailchimp_ecommerce_opt_in'] = [
@@ -78,12 +78,14 @@ function mailchimp_ecommerce_admin_settings() {
   ];
   $form['mailchimp_ecommerce_opt_in']['mailchimp_ecommerce_opt_in_status_markup'] = [
     '#markup' => t('You must decide on the status of customers that entered into
-     the eCommerce API. By choosing True in the option below, users will added 
-     as normal subscribers.  If you choose true, be certain your customers know 
-     they are subscribing to an email list. If you choose False below, the users 
-     will be added as "transactional" users. Transactional users cannot be changed
-     via the MailChimp UI. Changing the status of a "transactional" user call only
-     be accomplished via the API. For additional information, please read the') . ' ' . l('MailChimp Documentation.', 'http://developer.mailchimp.com/documentation/mailchimp/guides/getting-started-with-ecommerce/#about-subscribers-and-customers', ['external' => TRUE]),
+     the eCommerce API. By choosing "<b>Normal Subscriber</b>" in the option
+     below, users will added as normal subscribers.  If you choose
+     "Normal Subscriber", be certain your customers know they are subscribing
+     to an email list. If you choose "<b>Transactional Subscriber</b>" below,
+     the users will be added as "transactional" users. Transactional users
+     cannot be changed via the MailChimp UI. Changing the status of a 
+     "transactional" user call only be accomplished via the API. For additional
+     information, please read the') . ' ' . l('MailChimp Documentation.', 'http://developer.mailchimp.com/documentation/mailchimp/guides/getting-started-with-ecommerce/#about-subscribers-and-customers', ['external' => TRUE]),
   ];
 
   $form['mailchimp_ecommerce_opt_in']['mailchimp_ecommerce_opt_in_status'] = [
