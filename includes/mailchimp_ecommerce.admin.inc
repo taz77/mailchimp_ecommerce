@@ -9,21 +9,21 @@
  * The MailChimp eCommerce settings form.
  */
 function mailchimp_ecommerce_admin_settings() {
-  $form['mailchimp_ecommerce_notice'] = array(
+  $form['mailchimp_ecommerce_notice'] = [
     '#markup' => t('This page will allow you to create a store. Once created, you cannot change the list associated with the store.'),
-  );
-  $form['mailchimp_ecommerce_store_name'] = array(
+  ];
+  $form['mailchimp_ecommerce_store_name'] = [
     '#type' => 'textfield',
     '#title' => t('Store Name'),
     '#required' => TRUE,
     '#default_value' => variable_get('mailchimp_ecommerce_store_name', ''),
     '#description' => t('The name of your store as it should appear in your MailChimp account.'),
-  );
+  ];
 
   $mailchimp_lists = mailchimp_get_lists();
-  $list_options = array(
+  $list_options = [
     '' => '-- Select --',
-  );
+  ];
 
   foreach ($mailchimp_lists as $list_id => $list) {
     $list_options[$list_id] = $list->name;
@@ -31,69 +31,69 @@ function mailchimp_ecommerce_admin_settings() {
 
   if (!empty(variable_get('mailchimp_ecommerce_list_id', ''))) {
     $existing_store_id = variable_get('mailchimp_ecommerce_list_id');
-    $form['mailchimp_ecommerce_list_id_existing'] = array(
+    $form['mailchimp_ecommerce_list_id_existing'] = [
       '#markup' => t('Once created, the list cannot be changed for a given store. This store is connected to the list named') . ' ' . $list_options[$existing_store_id],
-    );
+    ];
   }
   else {
-    $form['mailchimp_ecommerce_list_id'] = array(
+    $form['mailchimp_ecommerce_list_id'] = [
       '#type' => 'select',
       '#title' => t('Store List'),
       '#required' => TRUE,
       '#options' => $list_options,
       '#default_value' => variable_get('mailchimp_ecommerce_list_id', ''),
-    );
+    ];
   }
 
   if (module_exists('commerce')) {
-    $form['mailchimp_ecommere_commerce_default_currency'] = array(
+    $form['mailchimp_ecommere_commerce_default_currency'] = [
       '#type' => 'checkbox',
       '#title' => t('Use Commerce Default Currency'),
       '#description' => t('Drupal Commerce was detected as being installed. Check this box to use the default currency of Commerce'),
       '#default_value' => variable_get('mailchimp_ecommere_commerce_default_currency', ''),
-    );
+    ];
   }
 
   // @TODO Make this item go away with AJAX if the Drupal commerce box is checked.
-  $list_options_currency = array(
-    '' => '-- Select --',
-  ) + mailchimp_ecommerce_get_currency_codes();
-  $form['mailchimp_ecommerce_currency'] = array(
+  $list_options_currency = [
+      '' => '-- Select --',
+    ] + mailchimp_ecommerce_get_currency_codes();
+  $form['mailchimp_ecommerce_currency'] = [
     '#type' => 'select',
     '#options' => $list_options_currency,
     '#title' => t('Store Currency Code'),
-    '#description' => t('This is overridden if you have selected to use the default currency from Commerce.')
-  );
+    '#description' => t('This is overridden if you have selected to use the default currency from Commerce.'),
+  ];
 
-  $list_options = array(
+  $list_options = [
     '' => '-- Select --',
     'TRUE' => 'True',
     'FALSE' => 'False',
-  );
+  ];
 
-  $form['mailchimp_ecommerce_opt_in'] = array(
+  $form['mailchimp_ecommerce_opt_in'] = [
     '#type' => 'fieldset',
     '#title' => t('New User Opt-In Status'),
     '#collapsible' => FALSE,
-  );
-  $form['mailchimp_ecommerce_opt_in']['mailchimp_ecommerce_opt_in_status_markup'] = array(
+  ];
+  $form['mailchimp_ecommerce_opt_in']['mailchimp_ecommerce_opt_in_status_markup'] = [
     '#markup' => t('You must decide on the status of customers that entered into
      the eCommerce API. By choosing True in the option below, users will added 
      as normal subscribers.  If you choose true, be certain your customers know 
      they are subscribing to an email list. If you choose False below, the users 
      will be added as "transactional" users. Transactional users cannot be changed
      via the MailChimp UI. Changing the status of a "transactional" user call only
-     be accomplished via the API. For additional information, please read the') . ' ' . l('MailChimp Documentation.', 'http://developer.mailchimp.com/documentation/mailchimp/guides/getting-started-with-ecommerce/#about-subscribers-and-customers', array('external' => TRUE))
-  );
+     be accomplished via the API. For additional information, please read the') . ' ' . l('MailChimp Documentation.', 'http://developer.mailchimp.com/documentation/mailchimp/guides/getting-started-with-ecommerce/#about-subscribers-and-customers', ['external' => TRUE]),
+  ];
 
-  $form['mailchimp_ecommerce_opt_in']['mailchimp_ecommerce_opt_in_status'] = array(
+  $form['mailchimp_ecommerce_opt_in']['mailchimp_ecommerce_opt_in_status'] = [
     '#type' => 'select',
     '#title' => t('Opt-In Status For Customers'),
     '#required' => TRUE,
     '#options' => $list_options,
     '#default_value' => variable_get('mailchimp_ecommerce_opt_in_status', ''),
     '#description' => t('Choose your opt-in status before using this module.'),
-  );
+  ];
 
   $settings_form = system_settings_form($form);
   $settings_form['#submit'][] = 'mailchimp_ecommerce_admin_settings_submit';
@@ -106,31 +106,31 @@ function mailchimp_ecommerce_admin_settings() {
  */
 function mailchimp_ecommerce_admin_settings_submit($form, &$form_state) {
   $store_id = variable_get('mailchimp_ecommerce_store_id', NULL);
-    if ($store_id != NULL) {
-      // Detect if Commerce is installed and use the default currency.
-      if (!empty($form_state['values']['mailchimp_ecommere_commerce_default_currency'])) {
-        $currency = commerce_default_currency();
-      }
-      else {
-        $currency = $form_state['values']['mailchimp_ecommerce_currency'];
-      }
-
-      // Determine if a store is being created or updated.
-      $existing_store = mailchimp_ecommerce_get_store($store_id);
-
-      if (empty($existing_store)) {
-        $store = [
-          'list_id' => isset($form_state['values']['mailchimp_ecommerce_list_id']) ? $form_state['values']['mailchimp_ecommerce_list_id'] : variable_get('mailchimp_ecommerce_list_id'),
-          'name' => $form_state['values']['mailchimp_ecommerce_store_name'],
-          'currency_code' => $currency,
-        ];
-
-        mailchimp_ecommerce_add_store($store_id, $store);
-      }
-      else {
-        mailchimp_ecommerce_update_store($store_id,
-          $form_state['values']['mailchimp_ecommerce_store_name'],
-          $currency);
-      }
+  if ($store_id != NULL) {
+    // Detect if Commerce is installed and use the default currency.
+    if (!empty($form_state['values']['mailchimp_ecommere_commerce_default_currency'])) {
+      $currency = commerce_default_currency();
     }
+    else {
+      $currency = $form_state['values']['mailchimp_ecommerce_currency'];
+    }
+
+    // Determine if a store is being created or updated.
+    $existing_store = mailchimp_ecommerce_get_store($store_id);
+
+    if (empty($existing_store)) {
+      $store = [
+        'list_id' => isset($form_state['values']['mailchimp_ecommerce_list_id']) ? $form_state['values']['mailchimp_ecommerce_list_id'] : variable_get('mailchimp_ecommerce_list_id'),
+        'name' => $form_state['values']['mailchimp_ecommerce_store_name'],
+        'currency_code' => $currency,
+      ];
+
+      mailchimp_ecommerce_add_store($store_id, $store);
+    }
+    else {
+      mailchimp_ecommerce_update_store($store_id,
+        $form_state['values']['mailchimp_ecommerce_store_name'],
+        $currency);
+    }
+  }
 }
